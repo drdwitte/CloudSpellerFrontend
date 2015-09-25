@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title> MotifMapper </title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="d3/d3.min.js"></script>
+<script type="text/javascript" src="d3/colorbrewer.js"></script>
+
+<style>
+h1 {
+    	font-size: 175%;
+	text-align: center;
+}
+
+.axis text {
+	font: 15px sans-serif;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+</style>
+
+</head>
+
+<body>
+<h1 id="genefamily"></h1>
+
+<label> Dataset: </label>
+<select id="dataset" autocomplete="off">
+<option selected value="kn1/iORTHO000066_C90F20BLS95_KN1.json">iORTHO000066_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO000132_C90F20BLS95_KN1.json">iORTHO000132_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO000360_C90F20BLS95_KN1.json">iORTHO000360_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO001881_C90F20BLS95_KN1.json">iORTHO001881_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO002372_C90F20BLS95_KN1.json">iORTHO002372_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO002539_C90F20BLS95_KN1.json">iORTHO002539_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO002680_C90F20BLS95_KN1.json">iORTHO002680_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO003303_C90F20BLS95_KN1.json">iORTHO003303_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO003312_C90F20BLS95_KN1.json">iORTHO003312_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO004971_C90F20BLS95_KN1.json">iORTHO004971_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO005073_C90F20BLS95_KN1.json">iORTHO005073_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO005141_C90F20BLS95_KN1.json">iORTHO005141_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO005254_C90F20BLS95_KN1.json">iORTHO005254_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO005621_C90F20BLS95_KN1.json">iORTHO005621_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO006041_C90F20BLS95_KN1.json">iORTHO006041_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO008364_C90F20BLS95_KN1.json">iORTHO008364_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO008372_C90F20BLS95_KN1.json">iORTHO008372_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO008383_C90F20BLS95_KN1.json">iORTHO008383_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO008527_C90F20BLS95_KN1.json">iORTHO008527_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO009368_C90F20BLS95_KN1.json">iORTHO009368_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO009560_C90F20BLS95_KN1.json">iORTHO009560_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO009594_C90F20BLS95_KN1.json">iORTHO009594_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO009853_C90F20BLS95_KN1.json">iORTHO009853_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO010311_C90F20BLS95_KN1.json">iORTHO010311_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO010421_C90F20BLS95_KN1.json">iORTHO010421_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO010708_C90F20BLS95_KN1.json">iORTHO010708_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO010741_C90F20BLS95_KN1.json">iORTHO010741_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO010818_C90F20BLS95_KN1.json">iORTHO010818_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO011067_C90F20BLS95_KN1.json">iORTHO011067_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013064_C90F20BLS95_KN1.json">iORTHO013064_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013295_C90F20BLS95_KN1.json">iORTHO013295_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013500_C90F20BLS95_KN1.json">iORTHO013500_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013743_C90F20BLS95_KN1.json">iORTHO013743_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013780_C90F20BLS95_KN1.json">iORTHO013780_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013805_C90F20BLS95_KN1.json">iORTHO013805_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013930_C90F20BLS95_KN1.json">iORTHO013930_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013938_C90F20BLS95_KN1.json">iORTHO013938_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO013975_C90F20BLS95_KN1.json">iORTHO013975_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO014919_C90F20BLS95_KN1.json">iORTHO014919_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO015747_C90F20BLS95_KN1.json">iORTHO015747_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO016098_C90F20BLS95_KN1.json">iORTHO016098_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO016109_C90F20BLS95_KN1.json">iORTHO016109_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO016543_C90F20BLS95_KN1.json">iORTHO016543_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO016716_C90F20BLS95_KN1.json">iORTHO016716_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO016813_C90F20BLS95_KN1.json">iORTHO016813_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO017121_C90F20BLS95_KN1.json">iORTHO017121_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO017349_C90F20BLS95_KN1.json">iORTHO017349_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO017366_C90F20BLS95_KN1.json">iORTHO017366_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO017390_C90F20BLS95_KN1.json">iORTHO017390_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO017393_C90F20BLS95_KN1.json">iORTHO017393_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO017512_C90F20BLS95_KN1.json">iORTHO017512_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO018425_C90F20BLS95_KN1.json">iORTHO018425_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO018619_C90F20BLS95_KN1.json">iORTHO018619_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO019970_C90F20BLS95_KN1.json">iORTHO019970_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO020108_C90F20BLS95_KN1.json">iORTHO020108_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO020121_C90F20BLS95_KN1.json">iORTHO020121_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO020492_C90F20BLS95_KN1.json">iORTHO020492_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO020607_C90F20BLS95_KN1.json">iORTHO020607_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO021593_C90F20BLS95_KN1.json">iORTHO021593_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO023338_C90F20BLS95_KN1.json">iORTHO023338_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO023387_C90F20BLS95_KN1.json">iORTHO023387_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO024686_C90F20BLS95_KN1.json">iORTHO024686_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO025078_C90F20BLS95_KN1.json">iORTHO025078_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO025230_C90F20BLS95_KN1.json">iORTHO025230_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO025869_C90F20BLS95_KN1.json">iORTHO025869_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO026103_C90F20BLS95_KN1.json">iORTHO026103_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO026604_C90F20BLS95_KN1.json">iORTHO026604_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO026797_C90F20BLS95_KN1.json">iORTHO026797_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO026863_C90F20BLS95_KN1.json">iORTHO026863_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO027453_C90F20BLS95_KN1.json">iORTHO027453_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO027639_C90F20BLS95_KN1.json">iORTHO027639_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO027703_C90F20BLS95_KN1.json">iORTHO027703_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO028360_C90F20BLS95_KN1.json">iORTHO028360_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO028732_C90F20BLS95_KN1.json">iORTHO028732_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO029383_C90F20BLS95_KN1.json">iORTHO029383_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO029500_C90F20BLS95_KN1.json">iORTHO029500_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO029602_C90F20BLS95_KN1.json">iORTHO029602_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO030048_C90F20BLS95_KN1.json">iORTHO030048_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO031758_C90F20BLS95_KN1.json">iORTHO031758_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO033481_C90F20BLS95_KN1.json">iORTHO033481_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO033548_C90F20BLS95_KN1.json">iORTHO033548_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO033592_C90F20BLS95_KN1.json">iORTHO033592_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO033714_C90F20BLS95_KN1.json">iORTHO033714_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO034400_C90F20BLS95_KN1.json">iORTHO034400_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO035652_C90F20BLS95_KN1.json">iORTHO035652_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO035884_C90F20BLS95_KN1.json">iORTHO035884_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO036204_C90F20BLS95_KN1.json">iORTHO036204_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO036752_C90F20BLS95_KN1.json">iORTHO036752_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO037236_C90F20BLS95_KN1.json">iORTHO037236_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO038101_C90F20BLS95_KN1.json">iORTHO038101_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO038542_C90F20BLS95_KN1.json">iORTHO038542_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO038658_C90F20BLS95_KN1.json">iORTHO038658_C90F20BLS95_KN1.json</option>
+<option value="kn1/iORTHO038888_C90F20BLS95_KN1.json">iORTHO038888_C90F20BLS95_KN1.json</option>'
+</select>
+<label> Xmin </label>
+<select id="min" autocomplete="off">
+	<option value="-2000">-2000</option>
+	<option value="-1900">-1900</option>
+	<option value="-1800">-1800</option>
+	<option value="-1700">-1700</option>
+	<option value="-1600">-1600</option>
+	<option value="-1500">-1500</option>
+	<option value="-1400">-1400</option>
+	<option value="-1300">-1300</option>
+	<option value="-1200">-1200</option>
+	<option value="-1100">-1100</option>
+	<option value="-1000">-1000</option>
+	<option value="-900">-900</option>
+	<option value="-800">-800</option>
+	<option value="-700">-700</option>
+	<option value="-600">-600</option>
+	<option value="-500">-500</option>
+	<option value="-400">-400</option>
+	<option value="-300">-300</option>
+	<option value="-200"selected>-200</option>
+	<option value="-100">-100</option>
+</select>
+<label> Xmax </label>
+<select id="max" autocomplete="off">
+	<option value="-1900">-1900</option>
+	<option value="-1800">-1800</option>
+	<option value="-1700">-1700</option>
+	<option value="-1600">-1600</option>
+	<option value="-1500">-1500</option>
+	<option value="-1400">-1400</option>
+	<option value="-1300">-1300</option>
+	<option value="-1200">-1200</option>
+	<option value="-1100">-1100</option>
+	<option value="-1000">-1000</option>
+	<option value="-900">-900</option>
+	<option value="-800">-800</option>
+	<option value="-700">-700</option>
+	<option value="-600">-600</option>
+	<option value="-500">-500</option>
+	<option value="-400">-400</option>
+	<option value="-300">-300</option>
+	<option value="-200">-200</option>
+	<option value="-100">-100</option>
+	<option value="0" selected>-0</option>
+</select>
+<label> Ymax </label>
+<select id="resolution" autocomplete="off">
+	<option value="25 ">25</option>
+	<option value="50">50</option>
+	<option value="100">100</option>
+	<option selected value="250">250</option>
+	<option value="500">500</option>
+	<option value="1000">1000</option>
+	<option value="2000">2000</option>
+</select>
+
+<label>Cutoff </label>
+<select id="cutoff" autocomplete="off">
+	<option selected value="0">0</option>
+	<option value="5">5</option>
+	<option value="10">10</option>
+	<option value="20">20</option>
+	<option value="50">50</option>
+	<option value="100">100</option>
+	<option value="200">200</option>
+	<option value="500">500</option>
+	<option value="1000">1000</option>
+</select>
+
+<label>Promoters per page </label>
+<select id="promoters" autocomplete="off">
+	<option value="1">1</option>
+	<option selected value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+
+</select>
+
+<input id="showprom0" type="checkbox" name="g1" value="0" checked> prom1
+<input id="showprom1" type="checkbox" name="g2" value="1" checked> prom2
+<input id="showprom2" type="checkbox" name="g3" value="2" checked> prom3
+<input id="showprom3" type="checkbox" name="g4" value="3" checked> prom4
+
+<script>
+
+//http://bl.ocks.org/mbostock/5577023 for all colorbrewer scales!!
+var brewer11 = colorbrewer.Paired[11];
+
+var brewer11Modified = [];
+brewer11Modified.push(brewer11[1]);
+brewer11Modified.push(brewer11[3]);
+brewer11Modified.push(brewer11[5]);
+brewer11Modified.push(brewer11[7]);
+
+brewer11Modified.push(brewer11[0]);
+brewer11Modified.push(brewer11[2]);
+brewer11Modified.push(brewer11[4]);
+brewer11Modified.push(brewer11[6]);
+brewer11Modified.push(brewer11[8]);
+brewer11Modified.push(brewer11[9]);
+brewer11Modified.push(brewer11[10]);
+
+
+
+
+var iupac = ['A', 'C', 'G', 'T', 'R', 'Y', 'S', 'W', 'K', 'M', 'N' ];
+var numProms = 4;
+
+var height = 400;
+var legendHeight = 50;
+var width = 1600;
+var margin = {top:60, bottom:60, left:120, right:60};
+
+var colorScale = d3.scale.ordinal()
+				.domain(iupac)
+				.range(brewer11Modified)
+
+
+var xAxis;
+var yAxis;
+
+var xScale;
+var yScale;
+
+var viewmin;
+var viewmax;
+
+var datasetFilename;
+
+var seqs = { 
+};
+
+$(function(){
+
+	d3.json("kn1/seqsKN1.json", function(gseqpairs){
+		console.log(gseqpairs);
+		seqs = gseqpairs;
+
+		console.log("Number of gseqs read: "+seqs.length);
+
+		redrawCanvas();
+		$("#min").on("change", function(){ redrawCanvas()});
+		$("#max").on("change", function(){ redrawCanvas()});
+		$("#resolution").on("change", function(){ redrawCanvas()});
+		$("#cutoff").on("change", function(){ redrawCanvas()});
+		$("#dataset").on("change", function(){ redrawCanvas()});
+		$("#promoters").on("change", function(){ redrawCanvas()});
+
+		
+
+		$("input#showprom"+0).click( function(){ return redrawCanvas();});
+		$("input#showprom"+1).click( function(){ return redrawCanvas();});
+		$("input#showprom"+2).click( function(){ return redrawCanvas();});
+		$("input#showprom"+3).click( function(){ return redrawCanvas();});
+	});
+	
+});
+
+function redrawCanvas(){
+
+	console.log("redrawcanvas");
+	viewmin = $("#min").val();
+	viewmax = $("#max").val();
+	datasetFilename=$("#dataset").val();
+	var resolution = $("#resolution").val();
+	height = 800 / parseInt($("#promoters").val());
+
+	console.log(viewmin + " - " + viewmax + " + " +resolution + " from: " + datasetFilename); 	
+
+
+
+	xScale = d3.scale.linear()
+				.domain([viewmin,viewmax])
+				.range([margin.left,width - margin.right],0.0)
+				;
+	yScale = d3.scale.linear()
+				.domain([0,resolution])
+				.range([height-margin.bottom,margin.top])
+				;
+
+
+	xAxis = d3.svg.axis()
+	    	.scale(xScale)
+		.ticks(20)	
+	    	.orient("bottom");
+
+	yAxis = d3.svg.axis()
+	    	.scale(yScale)
+		.ticks(5)	
+	    	.orient("left");
+
+
+	
+	
+	d3.json(datasetFilename, function(data){
+		createVisualization(data);
+	});
+
+
+
+}
+
+
+
+
+function createVisualization(data){
+
+	d3.selectAll("svg").remove();
+
+	//title
+	var familyname = data.family;
+	//$("#genefamily").text( "Mapping C90F20BLS95 motifs onto " + familyname );
+	
+	//subcharts
+	var genemappings = [];
+
+
+	for (var i=0; i<data.mappings.length; i++){
+		genemappings.push({g:data.mappings[i].geneID, s:data.mappings[i].mapping});
+	}
+
+	generateLegend();
+
+	console.log(genemappings);
+
+	genemappings.sort(function(a,b){ return a.g <= b.g ? 0 : 1;});
+
+	console.log(genemappings);
+	
+	for (var i=0; i<genemappings.length; i++){
+
+		if ($("input#showprom"+i).is(":checked")){
+			createGeneMapping(genemappings[i].g,genemappings[i].s,i);
+		}
+	}
+}
+
+
+	
+function createGeneMapping(gene, mapping, id){
+	
+	var svg = d3.select('body').append('svg')
+			.attr('height',height)
+			.attr('width',width)
+			.attr("id", "seq"+id)
+			;
+
+	
+	createAxisandTitle(svg, gene);
+
+
+	var filteredMapping = mapping.filter(function(freqs){
+		var k = Object.keys(freqs)[0];
+		var x = parseInt(k);
+		return (x>=viewmin && x<=viewmax);
+	});
+
+	var filteredMapping2 = filteredMapping.filter(function(freqs){
+		
+		var k = Object.keys(freqs)[0];
+		var tot = 0;
+
+		for (var i=0; i<iupac.length; i++){
+			
+			var h = freqs[k][iupac[i]];
+			tot+=h;
+		}
+
+		var offset = parseInt($("#cutoff").val());
+			
+
+		return tot >= offset;
+	});
+
+
+
+	var transformed_mapping = filteredMapping2.map(function(freqs){
+		
+		var k = Object.keys(freqs)[0];
+		
+		var tot = 0;
+		var offsets = [];
+		var hs = [];
+		for (var i=0; i<iupac.length; i++){
+			
+			var h = freqs[k][iupac[i]];
+			hs.push(h);
+			tot+=h;
+			offsets.push(tot);
+		
+		}
+
+		return {x:parseInt(k), offsets:offsets, hs:hs};
+		
+	});
+
+
+
+	
+	var bars = svg.selectAll(".bars")
+				.data(transformed_mapping)
+				.enter()
+				.append("g")
+				;
+	
+	for (var i=0; i<iupac.length; i++){
+
+		var rectsA = bars.append("rect")
+				.attr("x",	function (d){ return xScale(d.x);			})
+				.attr("y",	function (d){ return yScale(d.offsets[i]);		})
+				.attr("width", 	function (d){ return xScale(1)-xScale(0);		})	
+				.attr("height", function (d){ return yScale(0)-yScale(d.hs[i]); 	})
+				.style("fill",	function (d){ return colorScale(iupac[i]);})
+				;
+
+		
+	}
+
+	showGeneSeq(svg, gene);
+}
+
+function createAxisandTitle(svg, title){
+
+	var gX = svg.append("g");
+
+	gX.attr("class","axis");
+	gX.attr("transform","translate("
+		+0
+		+","
+		+(svg.attr("height")-margin.bottom)
+		+")"
+		);
+	gX.call(xAxis);
+
+	var gY = svg.append("g");
+	gY.attr("class","axis");
+	gY.attr("transform","translate("
+					+margin.left
+					+","
+					+0
+					+")"
+			);
+	gY.call(yAxis);
+
+	var labelX = svg.append("text")
+			.text("Relative distance to Transcription Start Site (bp)")
+			.attr("transform","translate("
+					+(svg.attr("width")/2 -100)
+					+","
+					+(svg.attr("height")-margin.bottom+50)
+					+")"
+		);
+
+
+	var labelY = svg.append("text")
+			.text("#motif bindings in "+title)
+			.attr("transform","translate("
+					+(margin.left/2)
+					+","
+					+(margin.top-20)
+					+")"
+		);
+
+	
+	
+
+
+}
+
+function generateLegend(){
+
+	
+	var legend = d3.select("body").append("svg")
+				.attr("width",width)
+				.attr("height",50);
+
+
+	for (var i=0; i<iupac.length; i++){
+	
+		legend.append("rect")
+			.attr("x", margin.left + i*80)
+			.attr("y", legendHeight/2 )
+			.attr("width", 20)
+			.attr("height", 20)
+			.style("fill",colorScale(iupac[i]))
+			;
+		legend.append("text")
+			.text(iupac[i])
+			.attr("x", margin.left + i*80 + 25)
+			.attr("y", legendHeight/2 +15 )
+			.attr("font-family", "sans-serif")
+			.attr("font-size", "15px")
+			.style("fill", "black")
+			;
+	
+	}
+}
+
+
+function showGeneSeq(svg, gene ){
+	var geneSeq = seqs[gene];
+
+	var bases = svg.append("g");
+		for (var i=0; i<geneSeq.length; i++){
+
+		var x = - geneSeq.length + i;
+
+		if (x >= viewmin && x<=viewmax){
+
+			bases.append("text")
+				.text(geneSeq.charAt(i))
+				.attr("x", xScale(- geneSeq.length + i  + 0.2))
+				.attr("y", height - margin.bottom +9 )
+				.attr("font-family", "sans-serif")
+				.attr("font-size", "9px")
+				.style("fill", "black")
+				;
+
+
+		}
+		
+		
+
+	}
+}
+
+</script>
+
+
+</body>

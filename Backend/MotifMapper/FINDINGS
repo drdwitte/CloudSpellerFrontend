@@ -1,0 +1,4 @@
+
+Een motief zou geen mappingvalues mogen genereren die groter zijn dan 1, anders krijg je stevige vervorming door
+reverse complement en repeatstructuren (CGCG bijvoorbeeld waarop een motief meerdere bindingsplekken kan hebben)
+

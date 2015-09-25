@@ -47,4 +47,28 @@ public class BaseFreq {
 
         return js;
     }
+
+    public void normalize() {
+        CharacterIterator it = alph.getAllCharsIterator();
+
+        while (it.hasNext()){
+            Character c = it.next();
+            int freq = iupacFreqs.get(c);
+
+            if (freq > 1){
+                iupacFreqs.put(c,1);
+            }
+
+        }
+
+    }
+
+    public void joinWith(BaseFreq baseFreq) {
+        CharacterIterator it = alph.getAllCharsIterator();
+
+        while (it.hasNext()){
+            Character c = it.next();
+            iupacFreqs.put(c, iupacFreqs.get(c) + baseFreq.iupacFreqs.get(c));
+        }
+    }
 }

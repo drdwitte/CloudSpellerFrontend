@@ -31,6 +31,39 @@ public class BaseFreqList {
         }
     }
 
+    public void joinWith(BaseFreqList bf){
+        Set<Integer> keysLeft = bfList.keySet();
+        Set<Integer> keysRight = bf.bfList.keySet();
+
+        Set<Integer> allKeys = new HashSet<Integer>();
+        allKeys.addAll(keysLeft);
+        allKeys.addAll(keysRight);
+
+        for (Integer k : allKeys){
+
+            if (keysLeft.contains(k) && keysRight.contains(k)){
+                bfList.get(k).joinWith(bf.bfList.get(k));
+
+            } else if (keysLeft.contains(k)){
+
+            } else {
+                bfList.put(k,bf.bfList.get(k));
+            }
+
+        }
+
+
+
+    }
+
+    public void normalize() {
+        for (Map.Entry<Integer, BaseFreq> e : bfList.entrySet()) {
+
+            e.getValue().normalize();
+
+        }
+    }
+
     public JsonArray toJsonArray() {
         JsonArray a = new JsonArray();
 

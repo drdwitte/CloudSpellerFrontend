@@ -5,12 +5,16 @@ import be.iminds.motifmapper.input.Gene;
 import be.iminds.motifmapper.input.GeneFamily;
 import be.iminds.motifmapper.motifmodels.IUPACMotif;
 
+import be.iminds.motifmapper.phylogenetics.BLS;
+import be.iminds.motifmapper.phylogenetics.BLSCalculator;
+import be.iminds.motifmapper.toolbox.LineIterator;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 //TODO POC: BLS95, C90, F20 (lagere BLS maakt het moeilijker!)
 //TODO only work
@@ -22,13 +26,14 @@ public class StackedMapper {
 
     private GeneFamily gf;
     private PatternMatcher gst;
+    private BLSCalculator calculator;
 
     private Map<String,BaseFreqList> frequencies;
 
     public StackedMapper(GeneFamily gf){
         this.gf = gf;
         this.gst = new GeneralizedSuffixTree(gf.getSequences(),true,12,new BitSetDecorationFactory());
-
+        this.calculator = new BLSCalculator(gf);
         frequencies = new HashMap<String, BaseFreqList>();
 
         for (Gene g : gf.getGenes()){
@@ -40,30 +45,73 @@ public class StackedMapper {
         return gf.toString() + "\n" + frequencies;
     }
 
-    public void mapBackMotif(String motif){
+    public void mapBackMotifSet(LineIterator it, int bls){
+        PatternBLSPair p = new PatternBLSPair("",bls);
+        int c = 0;
+        while (it.hasNext()){
+            String line = it.next();
+            String pattern = line.split("\t")[0];
+            p.setPattern(pattern);
+            mapBackMotif(p);
 
-        IUPACMotif m = new IUPACMotif(motif,0);
+            c++;
+            if (c%100000==0)
+                pr(c/100000 + "/32");
+
+
+        }
+
+    }
+
+    public void mapBackMotif(PatternBLSPair pat){
+
+        IUPACMotif m = new IUPACMotif(pat.getPattern(),0);
 
         List<Suffix> matches = gst.matchExactPattern(m);
 
         if (matches==null) return;
+        BLS cutoffScore = new BLS(pat.getBls());
+
+        NodeDecoration nodeInfo = new SequenceIDSet(gf.getNumberOfGenes());
+        nodeInfo.processSuffixes(matches);
+        BLS score = (BLS) calculator.calculateScore(nodeInfo);
+
+        if (score.compareTo(cutoffScore)<0){ //score >=patternBLS
+            return;
+        }
 
         SuffixInterpreter interpreter = new SuffixInterpreter(gf);
 
+        //NOTE we only want to add +1 per motif -> renormalization is necessary since a motif can have
+        //multiple overlapping binding sites!
+
+        Map<String, BaseFreqList> pileup = new HashMap<String, BaseFreqList>();
+
+
         for (Suffix s : matches){
-            FullMotifMatchWithPos match = interpreter.translateSuffixWithPos(motif, s, 0);
 
-            pr(match);
-
+            FullMotifMatchWithPos match = interpreter.translateSuffixWithPos(pat.getPattern(), s, 0);
 
             String forwardMotif = match.getDirection() == '+' ? m.toString() : m.getComplement().toString();
 
-            //pr(forwardMotif);
+            String gene = match.getGene();
 
-            BaseFreqList bflist = frequencies.get(match.getGene());
 
-            frequencies.get(match.getGene()).increment(match.getMotifStartPosition(),match.getMotifStopPosition(), forwardMotif);
+            BaseFreqList bflist = pileup.get(gene);
+            if (bflist == null){
+                bflist = new BaseFreqList();
+                pileup.put(gene,bflist);
+            }
 
+            bflist.increment(match.getMotifStartPosition(), match.getMotifStopPosition(), forwardMotif);
+
+        }
+
+        for (Map.Entry<String,BaseFreqList> e : pileup.entrySet()){
+            BaseFreqList bfnormalized = e.getValue();
+            bfnormalized.normalize();
+
+            frequencies.get(e.getKey()).joinWith(bfnormalized);
         }
 
 
@@ -104,32 +152,73 @@ public class StackedMapper {
 
     public static void main(String [] args) throws IOException {
 
-        //String motifFilename = "AFRealFilteredC90F20BLS95_ALL.txt";
-        //LineIterator lines = new LineIterator(motifFilename);
+        String datasetdir = "/home/ddewitte/FULL_PROFESSIONAL_CONTAINER/Research/Bioinformatics_ALLSOURCES/" +
+                "Bioinformatics_NieuweFolderTerug2015/Datasets/Input/MonocotFamiliesAgg10PBL1em6/";
 
-        String genefamilyFilename ="groupOrtho1.txt";
+        int numFiles = 1764;
 
-        BufferedReader in = new BufferedReader(new FileReader(new File(genefamilyFilename)));
-        GeneFamily gf = new GeneFamily(in);
-
-
-        StackedMapper m = new StackedMapper(gf);
-        m.write(new BufferedWriter(new OutputStreamWriter(System.out)));
+        String motifFilename = "AFRealFilteredC90F20BLS95_ALL.txt";
 
 
-        m.mapBackMotif("TATACGC");
+        String genefamilyFilename ="groupOrtho";
+        String filesuffix = ".txt";
 
-        m.write(new BufferedWriter(new OutputStreamWriter(System.out)));
-/*
-        m.mapBackMotif("TCGTCC");
-        m.mapBackMotif("TGANNGANNG");*/
+        int numGF = 10;
+        List<String> famsTGA = Toolbox.getFamiliesWithBolducMatch();
 
-        //TODO; er moet nog een BLS worden vooropgesteld dus motif, BLS95!!, er bestaat iets als patternblspair en
-        //de pattern matcher van originele blsspeller1.0 kan dit, => even opzoeeken
+        Map<String,String> sequences = new HashMap<String, String>();
+
+        for (int i=1; i<=numFiles; i++) {
+
+            BufferedReader in = new BufferedReader(new FileReader(new File(datasetdir+genefamilyFilename+i+filesuffix)));
+
+            for (int j=0; j<numGF; j++) {
+                GeneFamily gf = new GeneFamily(in);
+
+                if (!gf.isInitialized())
+                    break;
+
+                if (gf.getNumberOfGenes()!=4){
+                    continue;
+                }
+                if (!famsTGA.contains(gf.getFamilyName())){
+                    continue;
+                }
+
+                pr("processing file "+i+"-"+j+" : " + gf.getFamilyName());
+
+                for (int g=0; g<gf.getNumberOfGenes(); g++){
+                    Gene gene = gf.getGenes().get(g);
+                    sequences.put(gene.getID() , gf.getSequence(gene).toString());
+                }
+
+                LineIterator lines = new LineIterator(motifFilename);
+
+                StackedMapper m = new StackedMapper(gf);
+
+                m.mapBackMotifSet(lines, 95);
+
+                m.write(new BufferedWriter(new OutputStreamWriter(System.out)));
+                m.write(new BufferedWriter(new FileWriter(new File(gf.getFamilyName() + "_C90F20BLS95" + "_KN1.txt"))));
+            }
+        }
+
+        BufferedWriter wr = new BufferedWriter(new FileWriter(new File("seqsKN1.json")));
+        wr.write("{"); wr.newLine();
+        for (Map.Entry<String,String> e : sequences.entrySet()){
+
+            wr.write("\""+e.getKey()+"\":\""+e.getValue() + "\","); wr.newLine();
+
+        }
+        wr.write("}"); wr.newLine();
+        wr.close();
 
 
 
     }
+
+
+
 
 
 
