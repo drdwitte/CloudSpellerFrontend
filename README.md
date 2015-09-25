@@ -45,3 +45,5 @@ Starting from for example C70, F20, BLS15 there are two tracks:
 			what motifs are in this peak is then a very small GST and match all motifs in that gene
 
 	
+
+![Mapback C90F20BLS95](screenshotMotifMapper.png?raw=true "Screenshot mapper")
